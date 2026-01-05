@@ -63,6 +63,11 @@ int LibevdevUinputDevice::writeEvent(int type, int code, int value)
     return libevdev_uinput_write_event(m_device, type, code, value);
 }
 
+int LibevdevUinputDevice::writeSynReportEvent()
+{
+    return writeEvent(EV_SYN, SYN_REPORT, 0);
+}
+
 int LibevdevUinputDevice::fd() const
 {
     return libevdev_uinput_get_fd(m_device);

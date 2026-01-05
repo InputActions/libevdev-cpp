@@ -53,6 +53,11 @@ public:
      * @see libevdev_uinput_write_event
      */
     int writeEvent(int type, int code, int value);
+    /**
+     * Writes a {EV_SYN, SYN_REPORT, 0} event.
+     * @see writeEvent
+     */
+    int writeSynReportEvent();
 
     void removeNonBlockFlag();
 
