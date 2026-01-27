@@ -18,10 +18,10 @@
 
 #include "LibevdevUinputDevice.h"
 #include "LibevdevDevice.h"
-#include <fcntl.h>
 #include "logging.h"
-#include <libevdev/libevdev.h>
+#include <fcntl.h>
 #include <libevdev/libevdev-uinput.h>
+#include <libevdev/libevdev.h>
 
 namespace InputActions
 {
@@ -31,12 +31,21 @@ LibevdevUinputDevice::LibevdevUinputDevice(libevdev_uinput *device)
 {
 }
 
+LibevdevUinputDevice::LibevdevUinputDevice(LibevdevUinputDevice &&other)
+{
+    *this = std::move(other);
+}
+
 LibevdevUinputDevice::~LibevdevUinputDevice()
 {
+    if (!m_device) {
+        return;
+    }
+
     libevdev_uinput_destroy(m_device);
 }
 
-std::unique_ptr<LibevdevUinputDevice> LibevdevUinputDevice::createManaged(LibevdevDevice *libevdevDevice, const QString &name)
+std::expected<LibevdevUinputDevice, int> LibevdevUinputDevice::createManaged(LibevdevDevice *libevdevDevice, const QString &name)
 {
     const auto oldName = libevdevDevice->name();
     if (!name.isEmpty()) {
@@ -44,18 +53,18 @@ std::unique_ptr<LibevdevUinputDevice> LibevdevUinputDevice::createManaged(Libevd
     }
 
     libevdev_uinput *device;
-    if (const auto error = libevdev_uinput_create_from_device(libevdevDevice->raw(), LIBEVDEV_UINPUT_OPEN_MANAGED, &device)) {
-        qWarning(LIBEVDEV_CPP, "libevdev_uinput_create_from_device failed: %d", -error);
-    }
+    const auto error = libevdev_uinput_create_from_device(libevdevDevice->raw(), LIBEVDEV_UINPUT_OPEN_MANAGED, &device);
 
     if (!name.isEmpty()) {
         libevdevDevice->setName(oldName);
     }
-    if (!device) {
-        return {};
+
+    if (error) {
+        qWarning(LIBEVDEV_CPP, "libevdev_uinput_create_from_device failed: %d", -error);
+        return std::unexpected(-error);
     }
 
-    return std::unique_ptr<LibevdevUinputDevice>(new LibevdevUinputDevice(device));
+    return LibevdevUinputDevice(device);
 }
 
 int LibevdevUinputDevice::writeEvent(int type, int code, int value)
@@ -81,6 +90,12 @@ QString LibevdevUinputDevice::devNode() const
 void LibevdevUinputDevice::removeNonBlockFlag()
 {
     fcntl(fd(), F_SETFL, fcntl(fd(), F_GETFL, 0) & ~O_NONBLOCK);
+}
+
+LibevdevUinputDevice &LibevdevUinputDevice::operator=(LibevdevUinputDevice &&other)
+{
+    std::swap(m_device, other.m_device);
+    return *this;
 }
 
 }

@@ -22,6 +22,7 @@
 #include <QSocketNotifier>
 #include <QString>
 #include <QtClassHelperMacros>
+#include <expected>
 #include <linux/input.h>
 
 struct libevdev;
@@ -40,13 +41,11 @@ public:
     LibevdevDevice();
     ~LibevdevDevice() override;
 
-    Q_DISABLE_COPY_MOVE(LibevdevDevice);
-
     /**
-     * @return Nullptr on failure.
+     * @return Errno on failure.
      * @see libevdev_new_from_fd
      */
-    static std::unique_ptr<LibevdevDevice> createFromPath(const QString &path);
+    static std::expected<std::unique_ptr<LibevdevDevice>, int> createFromPath(const QString &path);
 
     libevdev *raw() { return m_device; }
     const libevdev *raw() const { return m_device; }
@@ -124,6 +123,8 @@ signals:
 
 private:
     LibevdevDevice(libevdev *device);
+
+    Q_DISABLE_COPY_MOVE(LibevdevDevice);
 
     libevdev *m_device;
     std::unique_ptr<QSocketNotifier> m_notifier;

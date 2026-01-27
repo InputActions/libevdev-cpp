@@ -20,6 +20,7 @@
 
 #include <QString>
 #include <QtClassHelperMacros>
+#include <expected>
 #include <libevdev/libevdev-uinput.h>
 
 namespace InputActions
@@ -30,15 +31,14 @@ class LibevdevDevice;
 class LibevdevUinputDevice
 {
 public:
+    LibevdevUinputDevice(LibevdevUinputDevice &&);
     ~LibevdevUinputDevice();
 
     /**
      * @param name If empty, the libevdevDevice's name is used instead.
      * @see libevdev_uinput_create_from_device
      */
-    static std::unique_ptr<LibevdevUinputDevice> createManaged(LibevdevDevice *libevdevDevice, const QString &name = {});
-
-    Q_DISABLE_COPY_MOVE(LibevdevUinputDevice);
+    static std::expected<LibevdevUinputDevice, int> createManaged(LibevdevDevice *libevdevDevice, const QString &name = {});
 
     /**
      * @see libevdev_uinput_get_fd
@@ -61,10 +61,14 @@ public:
 
     void removeNonBlockFlag();
 
+    LibevdevUinputDevice &operator=(LibevdevUinputDevice &&);
+
 private:
     LibevdevUinputDevice(libevdev_uinput *device);
 
-    libevdev_uinput *m_device;
+    Q_DISABLE_COPY(LibevdevUinputDevice);
+
+    libevdev_uinput *m_device{};
 };
 
 }
