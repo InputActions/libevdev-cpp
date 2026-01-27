@@ -17,10 +17,10 @@
 */
 
 #include "LibevdevDevice.h"
+#include "logging.h"
+#include <QLoggingCategory>
 #include <fcntl.h>
 #include <libevdev/libevdev.h>
-#include <QLoggingCategory>
-#include "logging.h"
 
 Q_LOGGING_CATEGORY(LIBEVDEV_CPP, "inputactions.libevdev-cpp", QtWarningMsg);
 
@@ -51,12 +51,12 @@ LibevdevDevice::~LibevdevDevice()
     libevdev_free(m_device);
 }
 
-std::unique_ptr<LibevdevDevice> LibevdevDevice::createFromPath(const QString &path)
+std::expected<std::unique_ptr<LibevdevDevice>, int> LibevdevDevice::createFromPath(const QString &path)
 {
     const auto fd = open(path.toStdString().c_str(), O_RDONLY | O_NONBLOCK);
     if (fd == -1) {
         qCDebug(LIBEVDEV_CPP, "Failed to open device \"%s\": %d", path.toStdString().c_str(), errno);
-        return {};
+        return std::unexpected(errno);
     }
 
     fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -64,7 +64,7 @@ std::unique_ptr<LibevdevDevice> LibevdevDevice::createFromPath(const QString &pa
     if (const auto error = libevdev_new_from_fd(fd, &device)) {
         qWarning(LIBEVDEV_CPP, "libevdev_new_from_fd failed: %d", -error);
         close(fd);
-        return {};
+        return std::unexpected(-error);
     }
 
     return std::unique_ptr<LibevdevDevice>(new LibevdevDevice(device));
