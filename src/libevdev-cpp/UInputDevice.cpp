@@ -18,6 +18,7 @@
 
 #include "UInputDevice.h"
 #include "Device.h"
+#include "exceptions.h"
 #include "logging.h"
 #include <fcntl.h>
 #include <libevdev/libevdev-uinput.h>
@@ -45,7 +46,7 @@ UInputDevice::~UInputDevice()
     libevdev_uinput_destroy(m_device);
 }
 
-std::expected<UInputDevice, int> UInputDevice::createManaged(Device *device, const QString &name)
+UInputDevice UInputDevice::createManaged(Device *device, const QString &name)
 {
     const auto oldName = device->name();
     if (!name.isEmpty()) {
@@ -61,7 +62,7 @@ std::expected<UInputDevice, int> UInputDevice::createManaged(Device *device, con
 
     if (error) {
         qWarning(LIBEVDEV_CPP, "libevdev_uinput_create_from_device failed: %d", -error);
-        return std::unexpected(-error);
+        throw UInputDeviceCreationException(-error);
     }
 
     return UInputDevice(uinput);

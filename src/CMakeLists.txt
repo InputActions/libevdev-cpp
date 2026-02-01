@@ -5,6 +5,7 @@ add_library(libevdev-cpp STATIC
     libevdev-cpp/Device.cpp
     libevdev-cpp/UInputDevice.cpp
     libevdev-cpp/logging.cpp
+    libevdev-cpp/exceptions.cpp
 )
 target_link_libraries(libevdev-cpp PUBLIC
     Qt6::Core

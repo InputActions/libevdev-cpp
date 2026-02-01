@@ -20,7 +20,6 @@
 
 #include <QString>
 #include <QtClassHelperMacros>
-#include <expected>
 #include <libevdev/libevdev-uinput.h>
 
 namespace InputActions::libevdev
@@ -36,9 +35,10 @@ public:
 
     /**
      * @param name If empty, the specified device's name is used instead.
+     * @throws UInputDeviceCreationException If libevdev_uinput_create_from_device() fails.
      * @see libevdev_uinput_create_from_device
      */
-    static std::expected<UInputDevice, int> createManaged(Device *device, const QString &name = {});
+    static UInputDevice createManaged(Device *device, const QString &name = {});
 
     /**
      * @see libevdev_uinput_get_fd

@@ -17,6 +17,7 @@
 */
 
 #include "Device.h"
+#include "exceptions.h"
 #include "logging.h"
 #include <QLoggingCategory>
 #include <fcntl.h>
@@ -51,12 +52,12 @@ Device::~Device()
     libevdev_free(m_device);
 }
 
-std::expected<std::unique_ptr<Device>, int> Device::createFromPath(const QString &path)
+std::unique_ptr<Device> Device::createFromPath(const QString &path)
 {
     const auto fd = open(path.toStdString().c_str(), O_RDONLY | O_NONBLOCK);
     if (fd == -1) {
         qCDebug(LIBEVDEV_CPP, "Failed to open device \"%s\": %d", path.toStdString().c_str(), errno);
-        return std::unexpected(errno);
+        throw DeviceOpenException(errno);
     }
 
     fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -64,7 +65,7 @@ std::expected<std::unique_ptr<Device>, int> Device::createFromPath(const QString
     if (const auto error = libevdev_new_from_fd(fd, &device)) {
         qWarning(LIBEVDEV_CPP, "libevdev_new_from_fd failed: %d", -error);
         close(fd);
-        return std::unexpected(-error);
+        throw DeviceCreationException(-error);
     }
 
     return std::unique_ptr<Device>(new Device(device));

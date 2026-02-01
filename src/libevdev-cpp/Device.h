@@ -22,7 +22,6 @@
 #include <QSocketNotifier>
 #include <QString>
 #include <QtClassHelperMacros>
-#include <expected>
 #include <linux/input.h>
 
 struct libevdev;
@@ -42,10 +41,11 @@ public:
     ~Device() override;
 
     /**
-     * @return Errno on failure.
+     * @throws DeviceOpenException If open() fails.
+     * @throws DeviceCreationException If libevdev_new_from_fd() fails.
      * @see libevdev_new_from_fd
      */
-    static std::expected<std::unique_ptr<Device>, int> createFromPath(const QString &path);
+    static std::unique_ptr<Device> createFromPath(const QString &path);
 
     struct libevdev *raw() { return m_device; }
     const struct libevdev *raw() const { return m_device; }
