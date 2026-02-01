@@ -23,7 +23,7 @@
 #include <libevdev/libevdev-uinput.h>
 #include <libevdev/libevdev.h>
 
-namespace InputActions::LibEvdev
+namespace InputActions::libevdev
 {
 
 UInputDevice::UInputDevice(libevdev_uinput *device)

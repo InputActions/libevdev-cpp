@@ -24,7 +24,7 @@
 
 Q_LOGGING_CATEGORY(LIBEVDEV_CPP, "inputactions.libevdev-cpp", QtWarningMsg);
 
-namespace InputActions::LibEvdev
+namespace InputActions::libevdev
 {
 
 Device::Device()
@@ -32,7 +32,7 @@ Device::Device()
 {
 }
 
-Device::Device(libevdev *device)
+Device::Device(struct libevdev *device)
     : m_device(device)
 {
     if (const auto fd = libevdev_get_fd(m_device); fd != -1) {
@@ -60,7 +60,7 @@ std::expected<std::unique_ptr<Device>, int> Device::createFromPath(const QString
     }
 
     fcntl(fd, F_SETFD, FD_CLOEXEC);
-    libevdev *device;
+    struct libevdev *device;
     if (const auto error = libevdev_new_from_fd(fd, &device)) {
         qWarning(LIBEVDEV_CPP, "libevdev_new_from_fd failed: %d", -error);
         close(fd);

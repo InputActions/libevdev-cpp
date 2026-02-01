@@ -27,7 +27,7 @@
 
 struct libevdev;
 
-namespace InputActions::LibEvdev
+namespace InputActions::libevdev
 {
 
 class Device : public QObject
@@ -47,8 +47,8 @@ public:
      */
     static std::expected<std::unique_ptr<Device>, int> createFromPath(const QString &path);
 
-    libevdev *raw() { return m_device; }
-    const libevdev *raw() const { return m_device; }
+    struct libevdev *raw() { return m_device; }
+    const struct libevdev *raw() const { return m_device; }
 
     /**
      * @see libevdev_get_fd
@@ -122,11 +122,11 @@ signals:
     void eventsAvailable();
 
 private:
-    Device(libevdev *device);
+    Device(struct libevdev *device);
 
     Q_DISABLE_COPY_MOVE(Device);
 
-    libevdev *m_device;
+    struct libevdev *m_device;
     std::unique_ptr<QSocketNotifier> m_notifier;
 };
 

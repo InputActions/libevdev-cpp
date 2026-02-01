@@ -23,7 +23,7 @@
 #include <expected>
 #include <libevdev/libevdev-uinput.h>
 
-namespace InputActions::LibEvdev
+namespace InputActions::libevdev
 {
 
 class Device;
