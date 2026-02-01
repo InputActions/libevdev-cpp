@@ -27,10 +27,10 @@
 
 struct libevdev;
 
-namespace InputActions
+namespace InputActions::LibEvdev
 {
 
-class LibevdevDevice : public QObject
+class Device : public QObject
 {
     Q_OBJECT
 
@@ -38,14 +38,14 @@ public:
     /**
      * @see libevdev_new
      */
-    LibevdevDevice();
-    ~LibevdevDevice() override;
+    Device();
+    ~Device() override;
 
     /**
      * @return Errno on failure.
      * @see libevdev_new_from_fd
      */
-    static std::expected<std::unique_ptr<LibevdevDevice>, int> createFromPath(const QString &path);
+    static std::expected<std::unique_ptr<Device>, int> createFromPath(const QString &path);
 
     libevdev *raw() { return m_device; }
     const libevdev *raw() const { return m_device; }
@@ -122,9 +122,9 @@ signals:
     void eventsAvailable();
 
 private:
-    LibevdevDevice(libevdev *device);
+    Device(libevdev *device);
 
-    Q_DISABLE_COPY_MOVE(LibevdevDevice);
+    Q_DISABLE_COPY_MOVE(Device);
 
     libevdev *m_device;
     std::unique_ptr<QSocketNotifier> m_notifier;

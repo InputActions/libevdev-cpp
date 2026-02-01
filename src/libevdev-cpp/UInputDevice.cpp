@@ -16,27 +16,27 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "LibevdevUinputDevice.h"
-#include "LibevdevDevice.h"
+#include "UInputDevice.h"
+#include "Device.h"
 #include "logging.h"
 #include <fcntl.h>
 #include <libevdev/libevdev-uinput.h>
 #include <libevdev/libevdev.h>
 
-namespace InputActions
+namespace InputActions::LibEvdev
 {
 
-LibevdevUinputDevice::LibevdevUinputDevice(libevdev_uinput *device)
+UInputDevice::UInputDevice(libevdev_uinput *device)
     : m_device(device)
 {
 }
 
-LibevdevUinputDevice::LibevdevUinputDevice(LibevdevUinputDevice &&other)
+UInputDevice::UInputDevice(UInputDevice &&other)
 {
     *this = std::move(other);
 }
 
-LibevdevUinputDevice::~LibevdevUinputDevice()
+UInputDevice::~UInputDevice()
 {
     if (!m_device) {
         return;
@@ -45,18 +45,18 @@ LibevdevUinputDevice::~LibevdevUinputDevice()
     libevdev_uinput_destroy(m_device);
 }
 
-std::expected<LibevdevUinputDevice, int> LibevdevUinputDevice::createManaged(LibevdevDevice *libevdevDevice, const QString &name)
+std::expected<UInputDevice, int> UInputDevice::createManaged(Device *device, const QString &name)
 {
-    const auto oldName = libevdevDevice->name();
+    const auto oldName = device->name();
     if (!name.isEmpty()) {
-        libevdevDevice->setName(name);
+        device->setName(name);
     }
 
-    libevdev_uinput *device;
-    const auto error = libevdev_uinput_create_from_device(libevdevDevice->raw(), LIBEVDEV_UINPUT_OPEN_MANAGED, &device);
+    libevdev_uinput *uinput;
+    const auto error = libevdev_uinput_create_from_device(device->raw(), LIBEVDEV_UINPUT_OPEN_MANAGED, &uinput);
 
     if (!name.isEmpty()) {
-        libevdevDevice->setName(oldName);
+        device->setName(oldName);
     }
 
     if (error) {
@@ -64,35 +64,35 @@ std::expected<LibevdevUinputDevice, int> LibevdevUinputDevice::createManaged(Lib
         return std::unexpected(-error);
     }
 
-    return LibevdevUinputDevice(device);
+    return UInputDevice(uinput);
 }
 
-int LibevdevUinputDevice::writeEvent(int type, int code, int value)
+int UInputDevice::writeEvent(int type, int code, int value)
 {
     return libevdev_uinput_write_event(m_device, type, code, value);
 }
 
-int LibevdevUinputDevice::writeSynReportEvent()
+int UInputDevice::writeSynReportEvent()
 {
     return writeEvent(EV_SYN, SYN_REPORT, 0);
 }
 
-int LibevdevUinputDevice::fd() const
+int UInputDevice::fd() const
 {
     return libevdev_uinput_get_fd(m_device);
 }
 
-QString LibevdevUinputDevice::devNode() const
+QString UInputDevice::devNode() const
 {
     return libevdev_uinput_get_devnode(m_device);
 }
 
-void LibevdevUinputDevice::removeNonBlockFlag()
+void UInputDevice::removeNonBlockFlag()
 {
     fcntl(fd(), F_SETFL, fcntl(fd(), F_GETFL, 0) & ~O_NONBLOCK);
 }
 
-LibevdevUinputDevice &LibevdevUinputDevice::operator=(LibevdevUinputDevice &&other)
+UInputDevice &UInputDevice::operator=(UInputDevice &&other)
 {
     std::swap(m_device, other.m_device);
     return *this;

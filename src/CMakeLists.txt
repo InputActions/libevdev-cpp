@@ -2,8 +2,8 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(LIBEVDEV REQUIRED libevdev)
 
 add_library(libevdev-cpp STATIC
-    libevdev-cpp/LibevdevDevice.cpp
-    libevdev-cpp/LibevdevUinputDevice.cpp
+    libevdev-cpp/Device.cpp
+    libevdev-cpp/UInputDevice.cpp
     libevdev-cpp/logging.cpp
 )
 target_link_libraries(libevdev-cpp PUBLIC

@@ -23,22 +23,22 @@
 #include <expected>
 #include <libevdev/libevdev-uinput.h>
 
-namespace InputActions
+namespace InputActions::LibEvdev
 {
 
-class LibevdevDevice;
+class Device;
 
-class LibevdevUinputDevice
+class UInputDevice
 {
 public:
-    LibevdevUinputDevice(LibevdevUinputDevice &&);
-    ~LibevdevUinputDevice();
+    UInputDevice(UInputDevice &&);
+    ~UInputDevice();
 
     /**
-     * @param name If empty, the libevdevDevice's name is used instead.
+     * @param name If empty, the specified device's name is used instead.
      * @see libevdev_uinput_create_from_device
      */
-    static std::expected<LibevdevUinputDevice, int> createManaged(LibevdevDevice *libevdevDevice, const QString &name = {});
+    static std::expected<UInputDevice, int> createManaged(Device *device, const QString &name = {});
 
     /**
      * @see libevdev_uinput_get_fd
@@ -61,12 +61,12 @@ public:
 
     void removeNonBlockFlag();
 
-    LibevdevUinputDevice &operator=(LibevdevUinputDevice &&);
+    UInputDevice &operator=(UInputDevice &&);
 
 private:
-    LibevdevUinputDevice(libevdev_uinput *device);
+    UInputDevice(libevdev_uinput *device);
 
-    Q_DISABLE_COPY(LibevdevUinputDevice);
+    Q_DISABLE_COPY(UInputDevice);
 
     libevdev_uinput *m_device{};
 };

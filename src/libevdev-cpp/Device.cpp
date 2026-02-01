@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "LibevdevDevice.h"
+#include "Device.h"
 #include "logging.h"
 #include <QLoggingCategory>
 #include <fcntl.h>
@@ -24,15 +24,15 @@
 
 Q_LOGGING_CATEGORY(LIBEVDEV_CPP, "inputactions.libevdev-cpp", QtWarningMsg);
 
-namespace InputActions
+namespace InputActions::LibEvdev
 {
 
-LibevdevDevice::LibevdevDevice()
-    : LibevdevDevice(libevdev_new())
+Device::Device()
+    : Device(libevdev_new())
 {
 }
 
-LibevdevDevice::LibevdevDevice(libevdev *device)
+Device::Device(libevdev *device)
     : m_device(device)
 {
     if (const auto fd = libevdev_get_fd(m_device); fd != -1) {
@@ -43,7 +43,7 @@ LibevdevDevice::LibevdevDevice(libevdev *device)
     }
 }
 
-LibevdevDevice::~LibevdevDevice()
+Device::~Device()
 {
     if (const auto fd = libevdev_get_fd(m_device); fd != -1) {
         close(fd);
@@ -51,7 +51,7 @@ LibevdevDevice::~LibevdevDevice()
     libevdev_free(m_device);
 }
 
-std::expected<std::unique_ptr<LibevdevDevice>, int> LibevdevDevice::createFromPath(const QString &path)
+std::expected<std::unique_ptr<Device>, int> Device::createFromPath(const QString &path)
 {
     const auto fd = open(path.toStdString().c_str(), O_RDONLY | O_NONBLOCK);
     if (fd == -1) {
@@ -67,80 +67,80 @@ std::expected<std::unique_ptr<LibevdevDevice>, int> LibevdevDevice::createFromPa
         return std::unexpected(-error);
     }
 
-    return std::unique_ptr<LibevdevDevice>(new LibevdevDevice(device));
+    return std::unique_ptr<Device>(new Device(device));
 }
 
-int LibevdevDevice::nextEvent(unsigned int flags, input_event &event)
+int Device::nextEvent(unsigned int flags, input_event &event)
 {
     return libevdev_next_event(m_device, flags, &event);
 }
 
-void LibevdevDevice::setName(const QString &value)
+void Device::setName(const QString &value)
 {
     libevdev_set_name(m_device, value.toStdString().c_str());
 }
 
-void LibevdevDevice::grab()
+void Device::grab()
 {
     libevdev_grab(m_device, LIBEVDEV_GRAB);
 }
 
-int LibevdevDevice::enableEventCode(unsigned int type, unsigned int code, const void *data)
+int Device::enableEventCode(unsigned int type, unsigned int code, const void *data)
 {
     return libevdev_enable_event_code(m_device, type, code, data);
 }
 
-int LibevdevDevice::enableEventType(unsigned int type)
+int Device::enableEventType(unsigned int type)
 {
     return libevdev_enable_event_type(m_device, type);
 }
 
-int LibevdevDevice::fd() const
+int Device::fd() const
 {
     return libevdev_get_fd(m_device);
 }
 
-QString LibevdevDevice::name() const
+QString Device::name() const
 {
     return libevdev_get_name(m_device);
 }
 
-bool LibevdevDevice::hasProperty(unsigned int prop) const
+bool Device::hasProperty(unsigned int prop) const
 {
     return libevdev_has_property(m_device, prop) == 1;
 }
 
-bool LibevdevDevice::hasEventCode(unsigned int type, unsigned int code) const
+bool Device::hasEventCode(unsigned int type, unsigned int code) const
 {
     return libevdev_has_event_code(m_device, type, code) == 1;
 }
 
-bool LibevdevDevice::hasEventType(unsigned int type) const
+bool Device::hasEventType(unsigned int type) const
 {
     return libevdev_has_event_type(m_device, type) == 1;
 }
 
-int LibevdevDevice::eventValue(unsigned int type, unsigned int code) const
+int Device::eventValue(unsigned int type, unsigned int code) const
 {
     return libevdev_get_event_value(m_device, type, code);
 }
 
-const input_absinfo *LibevdevDevice::absInfo(unsigned int code) const
+const input_absinfo *Device::absInfo(unsigned int code) const
 {
     return libevdev_get_abs_info(m_device, code);
 }
 
-int LibevdevDevice::currentSlot() const
+int Device::currentSlot() const
 {
     return libevdev_get_current_slot(m_device);
 }
 
-int LibevdevDevice::slotCount() const
+int Device::slotCount() const
 {
     return libevdev_get_num_slots(m_device);
 }
 
-int LibevdevDevice::slotValue(unsigned int slot, unsigned int code) const
+int Device::slotValue(unsigned int slot, unsigned int code) const
 {
     return libevdev_get_slot_value(m_device, slot, code);
 }
