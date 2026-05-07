@@ -22,6 +22,7 @@
 #include <QLoggingCategory>
 #include <fcntl.h>
 #include <libevdev/libevdev.h>
+#include <unistd.h>
 
 Q_LOGGING_CATEGORY(LIBEVDEV_CPP, "inputactions.libevdev-cpp", QtWarningMsg);
 
