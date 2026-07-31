@@ -12,6 +12,7 @@ target_link_libraries(libevdev-cpp PUBLIC
     ${LIBEVDEV_LIBRARIES}
 )
 target_compile_options(libevdev-cpp PUBLIC -fPIC)
-
-target_include_directories(libevdev-cpp PRIVATE ${LIBEVDEV_INCLUDE_DIRS})
-target_include_directories(libevdev-cpp PUBLIC libevdev-cpp)
+target_include_directories(libevdev-cpp PUBLIC
+    libevdev-cpp
+    ${LIBEVDEV_INCLUDE_DIRS}
+)
